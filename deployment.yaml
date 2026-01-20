@@ -18,5 +18,4 @@ spec:
       - name: indiaproj-container
         image: sumanta00/indiaproj:1.0
         ports:
-        - containerPort: 8080
-        imagePullPolicy: IfNotPresent
+        - containerPort: 80
