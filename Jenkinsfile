@@ -1,70 +1,68 @@
 pipeline {
   agent any
+
   tools {
     jdk 'JDK21'
     maven 'Maven'
   }
+
+  environment {
+    DOCKER_USER = "sumanta00"
+  }
+
   stages {
+
     stage('Checkout Code') {
       steps {
-        echo 'Pulling from Github'
+        echo 'Pulling Code from Github'
         git branch: 'main', credentialsId: 'mygithubcred', url: 'https://github.com/sumanta00/k8test.git'
       }
     }
-    stage('Test Code') {
+
+    stage('Run Tests') {
       steps {
-        echo 'JUNIT Test case execution started'
+        echo 'Executing JUnit Tests'
         bat 'mvn clean test'
-        
       }
       post {
         always {
-		  junit '**/target/surefire-reports/*.xml'
-          echo 'Test Run is SUCCESSFUL!'
+          junit '**/target/surefire-reports/*.xml'
         }
-
       }
     }
-    stage('Build Project') {
+
+    stage('Build JAR') {
       steps {
-        echo 'Building Java project'
+        echo 'Packaging JAR File'
         bat 'mvn clean package -DskipTests'
       }
     }
-    stage('Build the Docker Image') {
+
+    stage('Build Docker Image') {
       steps {
         echo 'Building Docker Image'
-        bat 'docker build -t myindiaproj:1.0 .'
+        bat "docker build -t ${DOCKER_USER}/indiaproj:1.0 ."
       }
     }
-    stage('Push Docker Image to DockerHub') {
+
+    stage('Push Docker Image') {
       steps {
-        echo 'Pushing  Docker Image'
         withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'DOCKER_PASS')]) {
-  	      bat '''
-          echo %DOCKER_PASS% | docker login -u deepikkaa20 --password-stdin
-          docker tag myjavaproj:1.0 deepikkaa20/myindiaproj:1.0
-          docker push deepikkaa20/myindiaproj:1.0
-          '''}
+          bat """
+          echo %DOCKER_PASS% | docker login -u ${DOCKER_USER} --password-stdin
+          docker push ${DOCKER_USER}/indiaproj:1.0
+          """
+        }
       }
     }
-    /*stage('Run Docker Container') {
-      steps {
-        echo 'Running Java Application'
-        bat '''
-        docker rm -f myjavaproj-container || exit 0
-        docker run --name myjavaproj-container myjavaproj:1.0
-        
-        '''               
-      }
-    }*/
   }
+
   post {
     success {
-      echo 'BUild and Run is SUCCESSFUL!'
+      echo 'Pipeline Execution Completed Successfully!'
     }
     failure {
-      echo 'OOPS!!! Failure.'
+      echo 'Pipeline Failed — Check Logs'
     }
   }
 }
