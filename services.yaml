@@ -4,9 +4,10 @@ metadata:
   name: indiaproj-service
 spec:
   selector:
-    app.kubernetes.io/name: indiaproj
+    app: indiaproj         # must match deployment
   ports:
   - protocol: TCP
-    port: 86
-    targetPort: 8080
+    port: 8080             # service port
+    targetPort: 8080       # container port
+    nodePort: 30080        # optional fixed NodePort
   type: NodePort
