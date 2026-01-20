@@ -52,7 +52,7 @@ pipeline {
         withCredentials([usernamePassword(credentialsId: 'dockerhubpwd', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
           bat """
           docker login -u %USER% -p %PASS%
-          docker push %DOCKER_USER%/%IMAGE_NAME%:%IMAGE_TAG%
+          docker push sumanta00/indiaproj:1.0
           """
         }
       }
@@ -63,7 +63,7 @@ pipeline {
         bat """
         minikube delete
         minikube start
-        minikube image load %DOCKER_USER%/%IMAGE_NAME%:%IMAGE_TAG%
+        minikube image load sumanta00/indiaproj:1.0
         kubectl apply -f deployment.yaml
         kubectl apply -f services.yaml
         kubectl get pods
