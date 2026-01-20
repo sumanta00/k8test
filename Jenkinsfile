@@ -8,7 +8,7 @@ pipeline {
     stage('Checkout Code') {
       steps {
         echo 'Pulling from Github'
-        git branch: 'main', credentialsId: 'mygithubcred', url: 'https://github.com/sumanta00/indiaproj.git'
+        git branch: 'main', credentialsId: 'mygithubcred', url: 'https://github.com/sumanta00/k8test.git'
       }
     }
     stage('Test Code') {
@@ -34,11 +34,21 @@ pipeline {
     stage('Build the Docker Image') {
       steps {
         echo 'Building Docker Image'
-        bat 'docker build -t myjavaproj:1.0 .'
+        bat 'docker build -t myindiaproj:1.0 .'
       }
     }
-    
-    stage('Run Docker Container') {
+    stage('Push Docker Image to DockerHub') {
+      steps {
+        echo 'Pushing  Docker Image'
+        withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'DOCKER_PASS')]) {
+  	      bat '''
+          echo %DOCKER_PASS% | docker login -u deepikkaa20 --password-stdin
+          docker tag myjavaproj:1.0 deepikkaa20/myindiaproj:1.0
+          docker push deepikkaa20/myindiaproj:1.0
+          '''}
+      }
+    }
+    /*stage('Run Docker Container') {
       steps {
         echo 'Running Java Application'
         bat '''
@@ -47,7 +57,7 @@ pipeline {
         
         '''               
       }
-    }
+    }*/
   }
   post {
     success {
